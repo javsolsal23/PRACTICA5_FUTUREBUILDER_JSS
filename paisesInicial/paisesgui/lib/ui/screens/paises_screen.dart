@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:paisesgui/data/repositories/paises_repository_p4.dart';
+import 'package:paisesgui/config/config.dart';
+import 'package:paisesgui/data/repositories/paises_repository.dart';
 import 'package:paisesgui/domain/entities/pais.dart';
 import 'package:paisesgui/ui/screens/infopais_screen.dart';
 
@@ -8,7 +9,7 @@ class PaisesScreen extends StatelessWidget {
 
   // Referencia al repositorio, de donde obtendremos la lista de continentes
   final String continente;
-  final PaisesRepository _repository = PaisesRepository();
+  final PaisesRepository _repository = PaisesRepository(Config.urlApi);
 
 
   @override
@@ -20,7 +21,15 @@ class PaisesScreen extends StatelessWidget {
           body: Center(
           // Proporciona a _creaLlistaPaises la lista de paises de Europa
           child:
-              _creaListaPaises(_repository.getPaises(continente))) 
+              FutureBuilder(
+                future: _repository.getPaises(continente),
+                builder: (context, asyncSnapshot) {
+                  if (!asyncSnapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
+                  return _creaListaPaises(asyncSnapshot.data!);
+                }
+              )) 
     );
   }
 
